@@ -1,0 +1,22 @@
+{
+  "name": "snappframes",
+  "version": "1.0.0",
+  "description": "roll_up for ERC721 tokens",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DalaiLlaama/snappframes.git"
+  },
+  "author": "snappframes team",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DalaiLlaama/snappframes/issues"
+  },
+  "homepage": "https://github.com/DalaiLlaama/snappframes#readme"
+}
