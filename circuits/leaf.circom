@@ -1,14 +1,14 @@
 include "../circomlib/mimc.circom";
-//include "../circomlib/eddsamimc.circom";
-include "./hash2.circom";
 
 template Leaf() {
-    signal input pubkey;
+    signal input pubkey_x;
+    signal input pubkey_y;
     signal input asset;
     signal output hash;
 
-    component leaf_hash = Hash2();
-    leaf_hash.a <== pubkey;
-    leaf_hash.b <== asset;
+    component leaf_hash = MultiMiMC7(3, 91);
+    leaf_hash.in[0] <== pubkey_x;
+    leaf_hash.in[1] <== pubkey_y;
+    leaf_hash.in[2] <== asset;
     hash <== leaf_hash.out;
 }
