@@ -1,0 +1,44 @@
+
+Data structures for ownership proofs: 
+
+1. A generic fixed size Merkle tree 
+
+   An array of size n, with entries HashValue, 
+   over the top of which we compute a Merkle tree. 
+
+   By storing HashValue, rather than a data value, the structure is
+   generic and can store any type of data.
+
+
+2. A Merkle tree to record a fixed movie: 
+   = a generic fixed size Merkle tree TM over the top of [Hash(Movie[i])]_{i=0..n-1} 
+    
+   Movie contract stores only the root of this tree. (This never changes after initialization.) 
+
+   An index in binary is also a sequence of length log(n) of directions (0,1) from the 
+   root of the tree to the leaf. 
+
+   To prove that a particular JPEG image I is at index i, present the Merkle 
+   path from root to leaf i and show hash(I) is stored at this leaf.  
+   This proof is robust to loss of all other data about the movie. 
+
+ 3. A Merkle tree to record ownership of frames in a movie 
+    = a generic fixed size Merkle tree TO over the top of [Hash(OwnershipPublicKey[i])]_{i=0..n-1}  
+
+   The smart contract stores the root of this tree. 
+
+   To prove ownership of the frame at index i, present 
+         -- the Merkle path to leaf i in TO, 
+         -- a key K such that the value stored at leaf i is Hash(K) 
+   and sign a challenge that verifies using K 
+
+
+   To prove ownership of a particular image I, and that it is at frame i, 
+   present both a proof of ownership of the frame at index i and a proof that 
+   I is the image at frame i. 
+      
+To transfer ownership, together with ability to produce the two types of proofs, 
+use K to sign the message "transfer to key K2". The smart contract/offchain process
+needs to verify the signature, rebuild the Merkle tree TO and return the new path to index 
+i in TO to the owner of K2, so that they have the proof material they need.     
+
