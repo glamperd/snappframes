@@ -1,3 +1,5 @@
+include "../circomlib/circuits/mimc.circom";
+
 // Hash 2 inputs
 template Hash2() {
     signal input a;

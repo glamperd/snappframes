@@ -1,4 +1,4 @@
-include "../circomlib/mimc.circom";
+include "../circomlib/circuits/mimc.circom";
 
 template Leaf() {
     signal input pubkey_x;

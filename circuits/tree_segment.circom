@@ -1,4 +1,4 @@
-include "../circomlib/mimc.circom";
+include "../circomlib/circuits/mimc.circom";
 include "./hash2.circom";
 
 // Merkle tree segment of depth 3
