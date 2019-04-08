@@ -59,3 +59,7 @@ typings/
 
 # next.js build output
 .next
+
+# proving and verification keys
+verification_key.json
+proving_key.json
