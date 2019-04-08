@@ -116,9 +116,9 @@ contract Snappframes is ERC721Full, EdDSA, MiMC {
         // // verify EdDSA signature
         // require(EdDSA.Verify(pubkey, hashed_msg, R, s));  
 
-        // // verify hashed msg sends leaf to msg.sender
-        // uint256 leaf = mimc.MiMCpe7(pubkey[0], pubkey[1], asset);
-        // require(verifyMerkleProof(leaf, proof, proof_pos, root))
+        // verify hashed msg sends leaf to msg.sender
+        uint256 leaf = mimc.MiMCpe7(mimc.MiMCpe7(pubkey[0], pubkey[1]), asset);
+        require(verifyMerkleProof(leaf, proof, proof_pos, root));
         // require(mimc.MiMCpe7(msg.sender, leaf) == hashed_msg);
 
         // generate ERC721 token
