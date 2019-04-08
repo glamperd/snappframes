@@ -36,6 +36,7 @@ contract EdDSA{
 
 contract Snappframes is Owned, EdDSA, MiMC  {
     using SafeMath for uint;
+    using SafeMath for uint256;
 
     string public symbol;
     string public name;
@@ -46,32 +47,21 @@ contract Snappframes is Owned, EdDSA, MiMC  {
     uint256 public pricePerFrame;
 
     address[4] depositQueueAddresses;
-    mapping(address => uint[2]) depositQueue;
+    mapping(address => uint) depositQueue;
+    mapping(address => uint256[2]) public ecdsaToEddsa;
 
-    uint8 depositQueueMax = 4;
+    uint8 DEPOSIT_QUEUE_MAX = 4;
     uint8 depositQueueLength = 0;
+    uint public TREE_DEPTH = 6;
+    uint PRICE_PER_FRAME = 1000;
+
 
     // Verifier verifier;
     MiMC mimc;
     EdDSA eddsa;
 
-    event Deposit(address _depositor, uint _from, uint _to);
+    event Deposit(address _depositor, uint _index);
     event DepositsProcessed(address _firstDepositor, address _lastDepositor);
-
-    using SafeMath for uint;
-    using SafeMath for uint256;
-
-    uint public TREE_DEPTH = 6;
-
-
-    address operator = msg.sender;
-    uint PRICE_PER_FRAME = 1000;
-    uint DEPOSIT_QUEUE_MAX = 4;
-    uint depositQueueLength = 0;
-    address[4] depositQueueAddresses;
-    mapping(address => uint) depositQueue;
-    mapping(address => uint256[2]) public ecdsaToEddsa;
-
 
 
     function init(address tokenOwner, string memory _symbol, string memory _name, uint256 _totalSupply, uint256 _dataHash, uint256 _stateHash, address _mimcAddr, address _eddsaAddr)  public {
@@ -85,13 +75,6 @@ contract Snappframes is Owned, EdDSA, MiMC  {
         eddsa = EdDSA(_eddsaAddr);
     }
 
-    // address _verifierAddr,
-    address _mimcAddr,
-    address _eddsaAddr
-)  public {
-    // Verifier verifier = Verifier(_verifierAddr);
-    mimc = MiMC(_mimcAddr);
-    eddsa = EdDSA(_eddsaAddr);
 
     // performs state transition
     function update() public onlyOwner {
@@ -100,7 +83,7 @@ contract Snappframes is Owned, EdDSA, MiMC  {
 
     // creates accounts for people who deposit Ether
     // @dev _from and _to are index ranges for movie frames
-    function deposit(uint _index, uint256[2] memory _eddsaPubKey)
+    function deposit(uint256 _index, uint256[2] memory _eddsaPubKey)
     public payable {
         require(depositQueueLength <= DEPOSIT_QUEUE_MAX);
         require(msg.value >= PRICE_PER_FRAME);
@@ -134,7 +117,7 @@ contract Snappframes is Owned, EdDSA, MiMC  {
         // uint256 hashed_msg, //hash of msg.sender and leaf
         // uint256[2] memory R, //EdDSA signature field
         // uint256 s //EdDSA signature field
-    ) public {
+    ) public view {
         uint256[2] memory eddsaPubKey = ecdsaToEddsa[msg.sender];
         require(eddsaPubKey[0] == pubkey[0] && eddsaPubKey[1] == pubkey[1]);
 
@@ -147,8 +130,8 @@ contract Snappframes is Owned, EdDSA, MiMC  {
         // require(mimc.MiMCpe7(msg.sender, leaf) == hashed_msg);
 
         // generate ERC721 token
-        bytes32 tokenId = keccak256(abi.encodePacked(pubkey[0],pubkey[1]));
-        _mint(msg.sender, bytes32ToUint256(tokenId));
+        // bytes32 tokenId = keccak256(abi.encodePacked(pubkey[0],pubkey[1]));
+        //_mint(msg.sender, bytes32ToUint256(tokenId));
 
         // send token to depositor on Ethereum
     }
@@ -174,7 +157,7 @@ contract Snappframes is Owned, EdDSA, MiMC  {
     // helpers
 
     // https://ethereum.stackexchange.com/questions/6498/how-to-convert-a-uint256-type-integer-into-a-bytes32
-    function bytes32ToUint256(bytes32 n) internal returns (uint256) {
+    function bytes32ToUint256(bytes32 n) internal pure returns (uint256) {
         return uint256(n);
     }
 
@@ -214,11 +197,11 @@ contract SnappframesFactory is Owned  {
         emit MinimumFeeUpdated(minimumFee, _minimumFee);
         minimumFee = _minimumFee;
     }
-    function deployTokenContract(string memory symbol, string memory name, uint256 totalSupply, uint256 dataHash, uint256 stateHash) public payable returns (Snappframes token)  {
+    function deployTokenContract(string memory symbol, string memory name, uint256 totalSupply, uint256 dataHash, uint256 stateHash,address mimcAddr, address eddsaAddr) public payable returns (Snappframes token)  {
         require(msg.value >= minimumFee);
         require(totalSupply > 0);
         token = new Snappframes();
-        token.init(msg.sender, symbol, name, totalSupply, dataHash, stateHash);
+        token.init(msg.sender, symbol, name, totalSupply, dataHash, stateHash, mimcAddr, eddsaAddr );
 
         isChild[address(token)] = true;
         children.push(address(token));
