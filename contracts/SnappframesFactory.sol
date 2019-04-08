@@ -1,15 +1,23 @@
-pragma solidity >=0.5.0;
+pragma solidity ^0.5.4;
 
-// import "./dependencies/EdDSA.sol";
-import "./dependencies/JubJub.sol";
-import '../node_modules/openzeppelin-solidity/contracts/token/ERC721/ERC721Full.sol';
-// import "./dependencies/SafeMath.sol";
+// ----------------------------------------------------------------------------
+// Borrowed from BokkyPooBah's Fixed Supply Token 👊 + Factory v1.10
+// https://github.com/bokkypoobah/FixedSupplyTokenFactory
+//
+//
+//
+// Snappframes Factory Contract
+//
+// Enjoy. (c) BokkyPooBah / Bok Consulting Pty Ltd 2019. The MIT Licence.
+// ----------------------------------------------------------------------------
 
-// contract Verifier{
 
-//     function Verify() public {}
+import "./dependancies/SafeMath.sol";
+import "./dependancies/Owned.sol";
 
-// }
+// import "./Snappframes.sol";
+// import "../circuits/verifier.sol";
+
 
 contract MiMC{
 
@@ -25,19 +33,38 @@ contract EdDSA{
 }
 
 
-contract Snappframes is ERC721Full, EdDSA, MiMC {
 
+contract Snappframes is Owned, EdDSA, MiMC  {
     using SafeMath for uint;
-    using SafeMath for uint256; 
 
-    uint public TREE_DEPTH = 6;
+    string public symbol;
+    string public name;
+    uint256 public totalSupply;
+    uint256 public dataHash;
+    uint256 public stateHash;
+    address public operator;
+    uint256 public pricePerFrame;
+
+    address[4] depositQueueAddresses;
+    mapping(address => uint[2]) depositQueue;
+
+    uint8 depositQueueMax = 4;
+    uint8 depositQueueLength = 0;
 
     // Verifier verifier;
     MiMC mimc;
     EdDSA eddsa;
 
+    event Deposit(address _depositor, uint _from, uint _to);
+    event DepositsProcessed(address _firstDepositor, address _lastDepositor);
+
+    using SafeMath for uint;
+    using SafeMath for uint256;
+
+    uint public TREE_DEPTH = 6;
+
+
     address operator = msg.sender;
-    uint TOTAL_FRAMES = 1000;
     uint PRICE_PER_FRAME = 1000;
     uint DEPOSIT_QUEUE_MAX = 4;
     uint depositQueueLength = 0;
@@ -45,39 +72,37 @@ contract Snappframes is ERC721Full, EdDSA, MiMC {
     mapping(address => uint) depositQueue;
     mapping(address => uint256[2]) public ecdsaToEddsa;
 
-    event Deposit(address _depositor, uint _index);
-    event DepositsProcessed(address _firstDepositor, address _lastDepositor);
 
-    modifier depositQueueNotFull(){
-        require(depositQueueLength <= DEPOSIT_QUEUE_MAX);
-        _;
-    }
 
-    modifier operatorOnly(){
-        require(msg.sender == operator);
-        _;
-    }
-
-    constructor(
-        // address _verifierAddr,
-        address _mimcAddr,
-        address _eddsaAddr
-    ) ERC721Full("Snappframes", "SNP") public {
-        // Verifier verifier = Verifier(_verifierAddr);
+    function init(address tokenOwner, string memory _symbol, string memory _name, uint256 _totalSupply, uint256 _dataHash, uint256 _stateHash, address _mimcAddr, address _eddsaAddr)  public {
+        super.init(tokenOwner);
+        symbol = _symbol;
+        name = _name;
+        totalSupply = _totalSupply;
+        dataHash = _dataHash;
+        stateHash = _stateHash;
         mimc = MiMC(_mimcAddr);
         eddsa = EdDSA(_eddsaAddr);
     }
 
+    // address _verifierAddr,
+    address _mimcAddr,
+    address _eddsaAddr
+)  public {
+    // Verifier verifier = Verifier(_verifierAddr);
+    mimc = MiMC(_mimcAddr);
+    eddsa = EdDSA(_eddsaAddr);
+
     // performs state transition
-    function update() public operatorOnly{
+    function update() public onlyOwner {
         // TODO: wait for Geoff's verifier circuit
     }
 
     // creates accounts for people who deposit Ether
     // @dev _from and _to are index ranges for movie frames
-    function deposit(uint _index, uint256[2] memory _eddsaPubKey) 
-    public payable depositQueueNotFull{
-
+    function deposit(uint _index, uint256[2] memory _eddsaPubKey)
+    public payable {
+        require(depositQueueLength <= DEPOSIT_QUEUE_MAX);
         require(msg.value >= PRICE_PER_FRAME);
 
         depositQueueLength++;
@@ -91,9 +116,9 @@ contract Snappframes is ERC721Full, EdDSA, MiMC {
     }
 
     // operator updates merkle tree with deposits
-    function processDepositQueue() public operatorOnly{
+    function processDepositQueue() public onlyOwner {
         emit DepositsProcessed(
-            depositQueueAddresses[0], 
+            depositQueueAddresses[0],
             depositQueueAddresses[DEPOSIT_QUEUE_MAX]);
         depositQueueLength = 0;
     }
@@ -101,10 +126,10 @@ contract Snappframes is ERC721Full, EdDSA, MiMC {
 
     // allows withdraw of ERC721 token to Ethereum address
     function withdraw(
-        uint256 asset, 
+        uint256 asset,
         uint256[2] memory pubkey, //EdDSA pubKey_x and pubKey_y
         uint256[7] memory proof,
-        uint256[7] memory proof_pos, 
+        uint256[7] memory proof_pos,
         uint256 root
         // uint256 hashed_msg, //hash of msg.sender and leaf
         // uint256[2] memory R, //EdDSA signature field
@@ -114,11 +139,11 @@ contract Snappframes is ERC721Full, EdDSA, MiMC {
         require(eddsaPubKey[0] == pubkey[0] && eddsaPubKey[1] == pubkey[1]);
 
         // // verify EdDSA signature
-        // require(EdDSA.Verify(pubkey, hashed_msg, R, s));  
+        // require(EdDSA.Verify(pubkey, hashed_msg, R, s));
 
-        // // verify hashed msg sends leaf to msg.sender
-        // uint256 leaf = mimc.MiMCpe7(pubkey[0], pubkey[1], asset);
-        // require(verifyMerkleProof(leaf, proof, proof_pos, root))
+        // verify hashed msg sends leaf to msg.sender
+        uint256 leaf = mimc.MiMCpe7(mimc.MiMCpe7(pubkey[0], pubkey[1]), asset);
+        require(verifyMerkleProof(leaf, proof, proof_pos, root));
         // require(mimc.MiMCpe7(msg.sender, leaf) == hashed_msg);
 
         // generate ERC721 token
@@ -140,7 +165,7 @@ contract Snappframes is ERC721Full, EdDSA, MiMC {
         root[0] = mimc.MiMCpe7(left, right);
         for (uint i = 1; i < 3; i++) {
             left = root[i-1] - _merklePos[i]*(root[i-1] - _merkleProof[0]);
-            right = _merkleProof[0] - _merklePos[i]*(_merkleProof[0] - root[i-1]);              
+            right = _merkleProof[0] - _merklePos[i]*(_merkleProof[0] - root[i-1]);
             root[i] = mimc.MiMCpe7(left, right);
             }
         return(root[2] == _root);
@@ -153,5 +178,57 @@ contract Snappframes is ERC721Full, EdDSA, MiMC {
         return uint256(n);
     }
 
+}
 
+
+
+
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+contract SnappframesFactory is Owned  {
+    using SafeMath for uint;
+
+    address public newAddress;
+    uint public minimumFee = 0.1 ether;
+    mapping(address => bool) public isChild;
+    address[] public children;
+
+    event FactoryDeprecated(address _newAddress);
+    event MinimumFeeUpdated(uint oldFee, uint newFee);
+    event TokenDeployed(address indexed owner, address indexed token, string symbol, string name, uint256 totalSupply, uint256 dataHash, uint256 stateHash);
+
+    constructor () public {
+        super.init(msg.sender);
+    }
+    function numberOfChildren() public view returns (uint) {
+        return children.length;
+    }
+    function deprecateFactory(address _newAddress) public onlyOwner {
+        require(newAddress == address(0));
+        emit FactoryDeprecated(_newAddress);
+        newAddress = _newAddress;
+    }
+    function setMinimumFee(uint _minimumFee) public onlyOwner  {
+        emit MinimumFeeUpdated(minimumFee, _minimumFee);
+        minimumFee = _minimumFee;
+    }
+    function deployTokenContract(string memory symbol, string memory name, uint256 totalSupply, uint256 dataHash, uint256 stateHash) public payable returns (Snappframes token)  {
+        require(msg.value >= minimumFee);
+        require(totalSupply > 0);
+        token = new Snappframes();
+        token.init(msg.sender, symbol, name, totalSupply, dataHash, stateHash);
+
+        isChild[address(token)] = true;
+        children.push(address(token));
+        if (msg.value > 0) {
+            owner.transfer(msg.value);
+        }
+        emit TokenDeployed(owner, address(token), symbol, name, totalSupply, dataHash, stateHash);
+
+    }
+    function () external payable {
+        revert();
+    }
 }
