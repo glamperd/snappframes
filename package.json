@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/DalaiLlaama/snappframes/issues"
   },
-  "homepage": "https://github.com/DalaiLlaama/snappframes#readme"
+  "homepage": "https://github.com/DalaiLlaama/snappframes#readme",
+  "dependencies": {
+    "openzeppelin-solidity": "^2.2.0"
+  }
 }
