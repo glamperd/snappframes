@@ -42,9 +42,10 @@ contract Snappframes is ERC721Full, EdDSA, MiMC {
     uint DEPOSIT_QUEUE_MAX = 4;
     uint depositQueueLength = 0;
     address[4] depositQueueAddresses;
-    mapping(address => uint[2]) depositQueue;
+    mapping(address => uint) depositQueue;
+    mapping(address => uint256[2]) public ecdsaToEddsa;
 
-    event Deposit(address _depositor, uint _from, uint _to);
+    event Deposit(address _depositor, uint _index);
     event DepositsProcessed(address _firstDepositor, address _lastDepositor);
 
     modifier depositQueueNotFull(){
@@ -74,17 +75,18 @@ contract Snappframes is ERC721Full, EdDSA, MiMC {
 
     // creates accounts for people who deposit Ether
     // @dev _from and _to are index ranges for movie frames
-    function deposit(uint _from, uint _to) public payable depositQueueNotFull{
+    function deposit(uint _index, uint256[2] memory _eddsaPubKey) 
+    public payable depositQueueNotFull{
 
-        uint numFrames = _to - _from;
-        require(numFrames > 0);
-        require(msg.value >= numFrames*PRICE_PER_FRAME);
+        require(msg.value >= PRICE_PER_FRAME);
 
         depositQueueLength++;
         depositQueueAddresses[depositQueueLength - 1] = msg.sender;
-        depositQueue[msg.sender] = [_from, _to];
+        depositQueue[msg.sender] = _index;
 
-        emit Deposit(msg.sender, _from, _to);
+        ecdsaToEddsa[msg.sender] = _eddsaPubKey;
+
+        emit Deposit(msg.sender, _index);
 
     }
 
@@ -101,21 +103,55 @@ contract Snappframes is ERC721Full, EdDSA, MiMC {
     function withdraw(
         uint256 asset, 
         uint256[2] memory pubkey, //EdDSA pubKey_x and pubKey_y
-        uint256 hashed_msg, //hash of msg.sender and leaf
-        uint256[2] memory R, //EdDSA signature field
-        uint256 s //EdDSA signature field
+        uint256[7] memory proof,
+        uint256[7] memory proof_pos, 
+        uint256 root
+        // uint256 hashed_msg, //hash of msg.sender and leaf
+        // uint256[2] memory R, //EdDSA signature field
+        // uint256 s //EdDSA signature field
     ) public {
-        // verify EdDSA signature
-        require(EdDSA.Verify(pubkey, hashed_msg, R, s)); 
-        // return result; 
+        uint256[2] memory eddsaPubKey = ecdsaToEddsa[msg.sender];
+        require(eddsaPubKey[0] == pubkey[0] && eddsaPubKey[1] == pubkey[1]);
 
-        // verify hashed msg sends leaf to msg.sender
-        // uint leaf = mimc.MiMCpe7(pubkey[0], pubkey[1], asset);
+        // // verify EdDSA signature
+        // require(EdDSA.Verify(pubkey, hashed_msg, R, s));  
+
+        // // verify hashed msg sends leaf to msg.sender
+        // uint256 leaf = mimc.MiMCpe7(pubkey[0], pubkey[1], asset);
+        // require(verifyMerkleProof(leaf, proof, proof_pos, root))
         // require(mimc.MiMCpe7(msg.sender, leaf) == hashed_msg);
 
         // generate ERC721 token
+        bytes32 tokenId = keccak256(abi.encodePacked(pubkey[0],pubkey[1]));
+        _mint(msg.sender, bytes32ToUint256(tokenId));
 
         // send token to depositor on Ethereum
     }
+
+    function verifyMerkleProof(
+        uint256 _leafHash,
+        uint256[7] memory _merkleProof,
+        uint256[7] memory _merklePos,
+        uint256 _root
+    ) public view returns(bool){
+        uint256[7] memory root;
+        uint256 left = _leafHash - _merklePos[0]*(_leafHash - _merkleProof[0]);
+        uint256 right = _merkleProof[0] - _merklePos[0]*(_merkleProof[0] - _leafHash);
+        root[0] = mimc.MiMCpe7(left, right);
+        for (uint i = 1; i < 3; i++) {
+            left = root[i-1] - _merklePos[i]*(root[i-1] - _merkleProof[0]);
+            right = _merkleProof[0] - _merklePos[i]*(_merkleProof[0] - root[i-1]);              
+            root[i] = mimc.MiMCpe7(left, right);
+            }
+        return(root[2] == _root);
+    }
+
+    // helpers
+
+    // https://ethereum.stackexchange.com/questions/6498/how-to-convert-a-uint256-type-integer-into-a-bytes32
+    function bytes32ToUint256(bytes32 n) internal returns (uint256) {
+        return uint256(n);
+    }
+
 
 }

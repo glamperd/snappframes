@@ -13,7 +13,7 @@ const msgHash = mimcjs.multiHash([recipient, leaf]);
 console.log(msgHash);
 
 // Alice signs old leaf
-const signature = eddsa.sign(prvKey, msgHash);
+const signature = eddsa.sign(prvKey, Buffer.from(msgHash, "hex"));
 console.log(signature);
 
 const inputs = {
@@ -26,6 +26,6 @@ const inputs = {
 
 fs.writeFileSync(
 "./eddsa_example.json",
-JSON.stringify(inputs),
+JSON.stringify(inputs, null, 2),
 "utf-8"
 );
