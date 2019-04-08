@@ -1,22 +1,46 @@
 pragma solidity >=0.5.0;
 
-import "./dependencies/SafeMath.sol";
-import 'openzeppelin-solidity/contracts/token/ERC721/ERC721Full.sol';
-import 'openzeppelin-solidity/contracts/token/ERC721/ERC721Mintable.sol';
+// import "./dependencies/EdDSA.sol";
+import "./dependencies/JubJub.sol";
+import '../node_modules/openzeppelin-solidity/contracts/token/ERC721/ERC721Full.sol';
+// import "./dependencies/SafeMath.sol";
 
-contract Verifier{
+// contract Verifier{
 
-    function Verify() public {}
+//     function Verify() public {}
+
+// }
+
+contract MiMC{
+
+    function MiMCpe7(uint,uint) public pure returns (uint) {}
 
 }
 
-contract Snappframes is ERC721Full, ERC721Mintable {
+contract EdDSA{
+
+    function Verify( uint256[2] memory, uint256, uint256[2] memory, uint256 )
+        public view returns (bool) {}
+
+}
+
+
+contract Snappframes is ERC721Full, EdDSA, MiMC {
+
+    using SafeMath for uint;
+    using SafeMath for uint256; 
+
+    uint public TREE_DEPTH = 6;
+
+    // Verifier verifier;
+    MiMC mimc;
+    EdDSA eddsa;
 
     address operator = msg.sender;
-    uint256 numFrames = 1000;
-    uint pricePerFrame = 1000;
-    uint8 depositQueueMax = 4;
-    uint8 depositQueueLength = 0;
+    uint TOTAL_FRAMES = 1000;
+    uint PRICE_PER_FRAME = 1000;
+    uint DEPOSIT_QUEUE_MAX = 4;
+    uint depositQueueLength = 0;
     address[4] depositQueueAddresses;
     mapping(address => uint[2]) depositQueue;
 
@@ -24,7 +48,7 @@ contract Snappframes is ERC721Full, ERC721Mintable {
     event DepositsProcessed(address _firstDepositor, address _lastDepositor);
 
     modifier depositQueueNotFull(){
-        require(depositQueueLength <= depositQueueMax);
+        require(depositQueueLength <= DEPOSIT_QUEUE_MAX);
         _;
     }
 
@@ -33,8 +57,14 @@ contract Snappframes is ERC721Full, ERC721Mintable {
         _;
     }
 
-    constructor(address _verifierAddr) ERC721Full("Snappframes", "SNP") public {
-        Verifier verifier = Verifier(_verifierAddr);
+    constructor(
+        // address _verifierAddr,
+        address _mimcAddr,
+        address _eddsaAddr
+    ) ERC721Full("Snappframes", "SNP") public {
+        // Verifier verifier = Verifier(_verifierAddr);
+        mimc = MiMC(_mimcAddr);
+        eddsa = EdDSA(_eddsaAddr);
     }
 
     // performs state transition
@@ -48,7 +78,7 @@ contract Snappframes is ERC721Full, ERC721Mintable {
 
         uint numFrames = _to - _from;
         require(numFrames > 0);
-        require(msg.value >= numFrames*pricePerFrame);
+        require(msg.value >= numFrames*PRICE_PER_FRAME);
 
         depositQueueLength++;
         depositQueueAddresses[depositQueueLength - 1] = msg.sender;
@@ -61,14 +91,27 @@ contract Snappframes is ERC721Full, ERC721Mintable {
     // operator updates merkle tree with deposits
     function processDepositQueue() public operatorOnly{
         emit DepositsProcessed(
-            _depositQueueAddresses[0], 
-            _depositQueueAddresses[depositQueueMax]);
+            depositQueueAddresses[0], 
+            depositQueueAddresses[DEPOSIT_QUEUE_MAX]);
         depositQueueLength = 0;
     }
 
+
     // allows withdraw of ERC721 token to Ethereum address
-    function withdraw() public{
-        // EdDSA verify a signed msgHash from token owner to Ethereum address
+    function withdraw(
+        uint256 asset, 
+        uint256[2] memory pubkey, //EdDSA pubKey_x and pubKey_y
+        uint256 hashed_msg, //hash of msg.sender and leaf
+        uint256[2] memory R, //EdDSA signature field
+        uint256 s //EdDSA signature field
+    ) public {
+        // verify EdDSA signature
+        require(EdDSA.Verify(pubkey, hashed_msg, R, s)); 
+        // return result; 
+
+        // verify hashed msg sends leaf to msg.sender
+        // uint leaf = mimc.MiMCpe7(pubkey[0], pubkey[1], asset);
+        // require(mimc.MiMCpe7(msg.sender, leaf) == hashed_msg);
 
         // generate ERC721 token
 

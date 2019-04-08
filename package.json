@@ -20,6 +20,9 @@
   },
   "homepage": "https://github.com/DalaiLlaama/snappframes#readme",
   "dependencies": {
-    "openzeppelin-solidity": "^2.2.0"
+    "blake-hash": "^1.1.0",
+    "ganache-cli": "^6.4.2",
+    "openzeppelin-solidity": "^2.2.0",
+    "web3": "^1.0.0-beta.52"
   }
 }
