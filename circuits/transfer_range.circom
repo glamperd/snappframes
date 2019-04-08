@@ -18,7 +18,7 @@ template Main() {
     signal input toPubKey_y;
     signal input segmentAssets[8];
     signal input segmentOwners[8,2];
-    signal input pathToSegment[3];
+    signal input pathToSegment[3]; // Sibling hashes along the path
     // EdDSA verifier params
     signal input R8x;
     signal input R8y;
@@ -100,17 +100,17 @@ template Main() {
         newSegment.leafHashes[i] <== newLeaves[i].hash;
     }
 
-    // Build full path including the segment. Calculate old root hash.
-    component newTree = TreeWithSegment6();
-
-    for (i=0; i<3; i++) {
-
-      newTree.pathToSegment[i] <== pathToSegment[i];
+    // Recalculate hashes up to the root.
+    component hash3[3];
+    hash3[0] = Hash2();
+    hash3[0].a <== newSegment.rootHash;
+    hash3[0].b <== pathToSegment[0];
+    for (i=1; i<3; i++) {
+        hash3[i] = Hash2();
+        hash3[i].a <== hash3[i-1].out;
+        hash3[i].b <== pathToSegment[i];
     }
-    newTree.segmentRootHash <== newSegment.rootHash;
-
-    oldRootHash = newTree.rootHash;
-
+    newRootHash <== hash3[2].out;
 }
 
 component main = Main();
