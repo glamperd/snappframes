@@ -108,4 +108,4 @@ To deploy `circuits/verifier.sol`, follow the instructions at https://github.com
 
 To generate the inputs to `verifyProof`, use `snarkjs generatecall`. We've saved the inputs in `test/verifyProof.js`. In fact, if you run that file you'll be able to directly interact with the `Verifier.sol` contract on Rinkeby.
 
-We also wrote a wrapper `Snappframes.sol` (deployed at https://ropsten.ethereum.com/address/0x86B689477554856Ba360b699e79b3dc9293F1183) which provides deposit and withdraw functionality. You can interact with it using `test/snappframes_test.js`. NB: the `MiMC` hash is not working yet on Solidity. We couldn't quite get the hang of Javascript cryptography!
+We also wrote a wrapper `Snappframes.sol` (deployed at https://ropsten.etherscan.io/address/0x86B689477554856Ba360b699e79b3dc9293F1183) which provides deposit and withdraw functionality. You can interact with it using `test/snappframes_test.js`. NB: the `MiMC` hash is not working yet on Solidity. We couldn't quite get the hang of Javascript cryptography!
