@@ -37,7 +37,7 @@ console.log('signature', signature)
 const pubKeyTo = eddsa.prv2pub(prvKeyTo);
 const newRoot = merkle(assetHashes, pubKeyTo, pathToSegment);
 
-const pk = "[''" + pubKeyFrom[0].toString() + "','" + pubKeyFrom[1].toString() + "]";
+const pk = [pubKeyFrom[0].toString(), pubKeyFrom[1].toString()];
 const inputs = {
       fromPubKey_x: pubKeyFrom[0].toString(),
       fromPubKey_y: pubKeyFrom[1].toString(),
