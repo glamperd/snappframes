@@ -49,8 +49,8 @@ const inputs = {
       R8x: signature.R8[0].toString(),
       R8y: signature.R8[1].toString(),
       S: signature.S.toString(),
-      toPubKey_x: pubKeyTo[0].toString(),
-      toPubKey_y: pubKeyTo[1].toString(),
+      toPubKey_x: pubKeyTo[0].toString(16),
+      toPubKey_y: pubKeyTo[1].toString(16),
       segmentAssets: assetHashes,
       segmentOwners: [pk,pk,pk,pk,pk,pk,pk,pk]
     }
@@ -60,13 +60,14 @@ const inputs = {
 fs.writeFileSync('./input.json', JSON.stringify(inputs) , 'utf-8');
 
 const contractInputs = {
-      EDDSA_0: [pubKeyFrom[0].toString(), pubKeyFrom[1].toString(),
+      EDDSA_0: ['0x'+pubKeyFrom[0].toString(16), '0x'+pubKeyFrom[1].toString(16)],
       ASSET_0: assetHashes[0].toString(),
-      OLD_LEAF_HASH: oldRoot.toString(),
-      MERKLE_PROOF: 
+      OLD_LEAF_HASH: mimcjs.multiHash([pubKeyFrom[0].toString(),pubKeyFrom[1].toString(),assetHashes[0].toString()]).toString(),
+      MERKLE_PROOF: [0,0,0],
+      INITIAL_ROOT: oldRoot.toString()
 }
 
-fs.writeFileSync('../contracts/contractInput.json'),JSON.stringify(contractInputs, null, 4, 'utf-8'); 
+fs.writeFileSync('../contracts/contractInput.json',JSON.stringify(contractInputs), null, " "); 
 
 //const new_hash = mimcjs.multiHash([pubKey[0],pubKey[1],nonce+1]);
 
