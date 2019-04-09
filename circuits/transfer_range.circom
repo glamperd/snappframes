@@ -12,8 +12,8 @@ template Main() {
     signal input fromPubKey_y;
     signal input oldRootHash;
     signal input newRootHash;
-    signal input indexFrom;
-    signal input indexTo;
+    signal input indexFrom; // Start frame with tree segment 0-7
+    signal input indexTo; // Transfer up to this frame number 0-7
     signal input toPubKey_x;
     signal input toPubKey_y;
     signal input segmentAssets[8];
@@ -24,7 +24,7 @@ template Main() {
     signal input R8y;
     signal input S;
 
-    signal input segRoot;
+    //signal input segRoot; // For debugging
 
     signal output out;
 
@@ -52,23 +52,23 @@ template Main() {
       old_tree.pathToSegment[i] <== pathToSegment[i];
     }
     old_tree.segmentRootHash <-- oldSegment.rootHash;
-    //segRoot === oldSegment.rootHash;
     oldRootHash === old_tree.rootHash;
 
     // Confirm signatures
-    //component verifier = EdDSAMiMCVerifier();
-    ///verifier.enabled <-- 0;
-    //verifier.Ax <-- fromPubKey_x;
-    //verifier.Ay <-- fromPubKey_y;
-    //verifier.R8x <-- R8x
-    //verifier.R8y <-- R8y
-    //verifier.S <-- S;
+    component verifier = EdDSAMiMCVerifier();
+    // TODO - Set this to 1 when it's working
+    verifier.enabled <-- 0;
+    verifier.Ax <-- fromPubKey_x;
+    verifier.Ay <-- fromPubKey_y;
+    verifier.R8x <-- R8x
+    verifier.R8y <-- R8y
+    verifier.S <-- S;
 
-    //component msgHash = MultiMiMC7(3,91);
-    //msgHash.in[0] <-- oldRootHash;
-    //msgHash.in[1] <-- indexFrom;
-    //msgHash.in[2] <-- indexTo;
-    //verifier.M <-- msgHash.out;
+    component msgHash = MultiMiMC7(3,91);
+    msgHash.in[0] <-- oldRootHash;
+    msgHash.in[1] <-- indexFrom;
+    msgHash.in[2] <-- indexTo;
+    verifier.M <-- msgHash.out;
 
     // Confirm ownership & Replace owner
 
