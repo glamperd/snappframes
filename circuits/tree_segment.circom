@@ -10,7 +10,7 @@ template TreeSegment8() {
 
     signal output rootHash;
 
-    component hash[8];
+    component hash[4];
     var numLeaves = 8;
     var i;
     for (i=0; i<4; i++) {
@@ -20,7 +20,7 @@ template TreeSegment8() {
       level2[i] <== hash[i].out;
     }
 
-    component hash2[4];
+    component hash2[2];
     for (i=0; i<2; i++) {
       hash2[i] = Hash2();
       hash2[i].a <== level2[i*2];

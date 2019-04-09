@@ -18,6 +18,7 @@ console.log('hash BA=', hashBA);
 
 const prvKeyFrom = Buffer.from("0000000000000000000000000000000000000000000000000000000000000001", "hex");
 const prvKeyTo = Buffer.from("0000000000000000000000000000000000000000000000000000000000000002", "hex");
+console.log("private keys", prvKeyFrom, prvKeyTo);
 
 const pubKeyFrom = eddsa.prv2pub(prvKeyFrom);
 const assetHashes = [0,1,2,3,4,5,6,7];
@@ -40,17 +41,16 @@ const inputs = {
       fromPubKey_y: pubKeyFrom[1].toString(),
 			oldRootHash: oldRoot.toString(),
       newRootHash: newRoot.toString(),
-			pathToSegment: [0, 0, 0].toString(),
-      indexFrom: "0",
-      indexTo: "7",
+			pathToSegment: [0, 0, 0],
+      indexFrom: 0,
+      indexTo: 7,
       R8x: signature.R8[0].toString(),
       R8y: signature.R8[1].toString(),
       S: signature.S.toString(),
-    	nonce: "0",
       toPubKey_x: pubKeyTo[0].toString(),
       toPubKey_y: pubKeyTo[1].toString(),
-      segmentAssets: assetHashes.toString(),
-      segmentOwners: [pubKeyFrom,pubKeyFrom,pubKeyFrom,pubKeyFrom,pubKeyFrom,pubKeyFrom,pubKeyFrom,pubKeyFrom].toString()
+      segmentAssets: assetHashes,
+      segmentOwners: [[pubKeyFrom],[pubKeyFrom],[pubKeyFrom],[pubKeyFrom],[pubKeyFrom],[pubKeyFrom],[pubKeyFrom],[pubKeyFrom]]
     }
 
 console.log(inputs)
@@ -70,20 +70,24 @@ function merkle(assetHashes, pubKey, pathToSegment) {
   console.log(hashes);
 
   var i;
-  var l3Hashes = new Array(8);
+  var l3Hashes = new Array(4);
   for (i=0; i<4; i++) {
       l3Hashes[i] = mimcjs.multiHash(hashes[i*2],hashes[i*2+1]);
+      console.log('hash',i,hashes[i*2] )
   }
-  var l2Hashes = new Array(4);
+  var l2Hashes = new Array(2);
   for (i=0; i<2; i++) {
       l2Hashes[i] = mimcjs.multiHash(l3Hashes[2*i],l3Hashes[2*i+1]);
+      console.log('l2 hash',i,hashes[i*2] )
   }
+  console.log('l2 hashes', l2Hashes.toString());
 
   var tree = new Array(DEPTH-1);
-  tree[0] = mimcjs.multiHash([l2Hashes[0],l2Hashes[1]]);
+  tree[0] = mimcjs.multiHash(l2Hashes[0],l2Hashes[1]);
+  console.log('tree0', tree[0]);
 
   for (i = 1; i < DEPTH-3; i++) {
-    tree[i] = mimcjs.multiHash([tree[i-1],pathToSegment[i]]);
+    tree[i] = mimcjs.multiHash(tree[i-1],pathToSegment[i]);
   }
 
   console.log('tree', tree)
