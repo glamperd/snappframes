@@ -1,16 +1,13 @@
 var Migrations = artifacts.require("./Migrations.sol");
-// var EdDSA = artifacts.require("./dependencies/EdDSA.sol");
-// var Verifier = artifacts.require("./Verifier.sol");
-var verifierAddr = "0x338D3E24C43EC3d8365558785f34cb93f04b87c8";
-var MiMC = artifacts.require("./dependencies/MiMC.sol");
+
+var verifierAddr = "0xFD198266A94fB2e02a3B674c0A1DbB78c376A307";
+var mimcAddr = "0x75f151b948fbc0ee3c8372606c7b7819726afcc9";
+
 var Snappframes = artifacts.require("./Snappframes.sol");
 
 module.exports = function(deployer, accounts) {
     deployer.deploy(Migrations);
 
-    deployer.deploy(MiMC).then(function() {
-        return deployer.deploy(Snappframes, verifierAddr, MiMC.address);
-    });
-
+    deployer.deploy(Snappframes, verifierAddr, mimcAddr);
     
 }

@@ -50,8 +50,8 @@ const inputs = {
       R8x: signature.R8[0].toString(),
       R8y: signature.R8[1].toString(),
       S: signature.S.toString(),
-      toPubKey_x: pubKeyTo[0].toString(16),
-      toPubKey_y: pubKeyTo[1].toString(16),
+      toPubKey_x: pubKeyTo[0].toString(),
+      toPubKey_y: pubKeyTo[1].toString(),
       segmentAssets: assetHashes,
       segmentOwners: [pk,pk,pk,pk,pk,pk,pk,pk]
     }
@@ -79,29 +79,29 @@ fs.writeFileSync('../contracts/contractInput.json',JSON.stringify(contractInputs
 function merkle(assetHashes, pubKey, pathToSegment) {
   console.log(assetHashes)
   const hashes = assetHashes.map((item, key) => {
-    return mimcjs.multiHash([pubKey[0].toString(),pubKey[1].toString(),item.toString()]);
+    return mimcjs.multiHash([BigInt(pubKey[0]).toString(),BigInt(pubKey[1]).toString(),item.toString()]);
   });
   console.log(hashes);
 
   var i;
   var l3Hashes = new Array(4);
   for (i=0; i<4; i++) {
-      l3Hashes[i] = mimcjs.multiHash([hashes[i*2].toString(),hashes[i*2+1].toString()]);
+      l3Hashes[i] = mimcjs.multiHash([BigInt(hashes[i*2]).toString(),BigInt(hashes[i*2+1]).toString()]);
       //console.log('hash',i,hashes[i*2] )
   }
   var l2Hashes = new Array(2);
   for (i=0; i<2; i++) {
-      l2Hashes[i] = mimcjs.multiHash([l3Hashes[2*i].toString(),l3Hashes[2*i+1].toString()]);
+      l2Hashes[i] = mimcjs.multiHash([BigInt(l3Hashes[2*i]).toString(),BigInt(l3Hashes[2*i+1]).toString()]);
       //console.log('l2 hash',i,hashes[i*2] )
   }
   //console.log('l2 hashes', l2Hashes.toString());
 
   var tree = new Array(DEPTH-1);
-  tree[0] = mimcjs.multiHash([l2Hashes[0].toString(),l2Hashes[1].toString()]);
-  //console.log('tree0', tree[0]);
+  tree[0] = mimcjs.multiHash([BigInt(l2Hashes[0]).toString(),BigInt(l2Hashes[1]).toString()]);
+  console.log('tree0', tree[0]);
 
   for (i = 1; i < DEPTH-3; i++) {
-    tree[i] = mimcjs.multiHash([tree[i-1].toString(),pathToSegment[i].toString()]);
+    tree[i] = mimcjs.multiHash([BigInt(tree[i-1]).toString(),pathToSegment[i].toString()]);
   }
 
   //console.log('tree', tree)

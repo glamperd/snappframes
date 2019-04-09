@@ -26,15 +26,15 @@ module.exports = {
         if (leafArray.length == 8){
             layer1 = []
             for (i = 0; i < 4; i++){
-                let hash = mimcjs.multiHash([leafArray[i], leafArray[i+1]])
+                let hash = mimcjs.multiHash([leafArray[2*i].toString(), leafArray[2*i+1].toString()])
                 layer1.push(hash);
             }
             layer2 = []
             for (i = 0; i < 2; i++){
-                let hash = mimcjs.multiHash([layer1[i], layer1[i+1]])
+                let hash = mimcjs.multiHash([layer1[2*i].toString(), layer1[2*i+1].toString()])
                 layer2.push(hash);
             }
-            var root = mimcjs.multiHash([layer2[0], layer2[1]]);
+            var root = mimcjs.multiHash([layer2[0].toString(), layer2[1].toString()]);
         } else {
             console.log("This only works for trees with 8 leaves")
         }
