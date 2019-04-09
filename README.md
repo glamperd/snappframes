@@ -16,17 +16,17 @@ At the most abstract level, we want to be able to do the following:
 
 A movie is specified as Movie: JPEGFile[n-1]   
 
-MoviePromoter requirements:  
+### MoviePromoter requirements:  
 - setup initial ownership of all frames to self 
 - sell blocks of frames to owners (initial owners can be wholesale, who onsell to retail owners) 
 
-Owner requirements: 
+### Owner requirements: 
   - independently of the archival storage of the whole movie, and however ownership is currently recorded 
   - can prove ownership of a particular image 
   - can prove an image to be part of a particular movie at particular frameNo 
   - can transfer ownership, together with ability to do the above proofs, of sub-blocks owned  
 
-Implementation Requirements:
+### Implementation Requirements:
   - image storage can be outsourced (e.g. to IPFS)  
   - ownership can be recorded either on or off chain 
   - owner can transfer between on and off chain recording of ownership
