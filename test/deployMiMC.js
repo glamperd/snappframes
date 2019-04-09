@@ -1,4 +1,4 @@
-const mimcGenContract = require("./circomlib/src/mimc_gencontract.js");
+const mimcGenContract = require("../circomlib/src/mimc_gencontract.js");
 
 const Web3 = require('web3');
 // const provider = ganache.provider();
