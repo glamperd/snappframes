@@ -8,16 +8,18 @@ template TreeWithSegment6() {
 
     signal output rootHash;
 
-    signal lastHash[4];
-
     component levelHash[3];
-    lastHash[0] <-- segmentRootHash;
+
+    levelHash[0] = Hash2();
+    levelHash[0].a <-- segmentRootHash ; 
+    levelHash[0].b <-- pathToSegment[2] ; 
+
     var i;
-    for (i=0; i<3; i++) {
+    for (i=1; i<3; i++) {
         levelHash[i] = Hash2();
-        levelHash[i].a <== lastHash[i];
-        levelHash[i].b <== pathToSegment[2-i];
-        lastHash[i+1] <-- levelHash[i].out;
+        levelHash[i].a <-- levelHash[i-1].out;
+        levelHash[i].b <-- pathToSegment[2-i];
     }
-    rootHash <== lastHash[3];
+    rootHash <-- levelHash[2].out;
 }
+
