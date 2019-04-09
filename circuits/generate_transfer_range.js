@@ -79,7 +79,7 @@ function merkle(assetHashes, pubKey, pathToSegment) {
   const hashes = assetHashes.map((item, key) => {
     return mimcjs.multiHash([pubKey[0].toString(),pubKey[1].toString(),item.toString()]);
   });
-  //console.log(hashes);
+  console.log(hashes);
 
   var i;
   var l3Hashes = new Array(4);
