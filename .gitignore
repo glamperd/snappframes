@@ -64,3 +64,4 @@ typings/
 verification_key.json
 proving_key.json
 *\witness.json
+*\proving_key.json
