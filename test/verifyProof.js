@@ -2,18 +2,17 @@ const Web3 = require('web3');
 const Tx = require('ethereumjs-tx');
 var ethers = require('ethers');
 
-let testnet = 'rinkeby'
-// let testnet = 'ropsten'
+// let testnet = 'rinkeby'
+let testnet = 'ropsten'
 // let testnet = 'kovan'
 let selectedHost = 'https://' + testnet + '.infura.io/v3/ce26c7d418db4e4695aaa359a1013ab2';
 web3 = new Web3(new Web3.providers.HttpProvider(selectedHost));
 
 //ropsten
-// const contractAddr = '0x47c7827142764c08118f8215F3097Ff11e36427E'; 
-// const contractAddr = '0x7FD45bd930C63093c9d5770Cbc8D3aEada15CcA1'; //Jordi's G2 points
+const contractAddr = '0xEd3564b7377b90fad536e428e54d856E6928b4dA'; 
 
 //rinkeby
-const contractAddr = '0xDcDCDd25f10ad1A26090010a89994Eb644f88427'
+// const contractAddr = '0xDcDCDd25f10ad1A26090010a89994Eb644f88427'
 // const contractAddr = '0xEd3564b7377b90fad536e428e54d856E6928b4dA' //Jordi's G2 points
 
 const pubAddr = '0xcE152b33c48be6e0c5876b057334eA01c8deC0e5';

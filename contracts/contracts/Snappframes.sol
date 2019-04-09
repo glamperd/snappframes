@@ -2,7 +2,7 @@ pragma solidity >=0.5.0;
 
 // import "./dependencies/EdDSA.sol";
 // import "./dependencies/JubJub.sol";
-import '../node_modules/openzeppelin-solidity/contracts/token/ERC721/ERC721Full.sol';
+import 'openzeppelin-solidity/contracts/token/ERC721/ERC721Full.sol';
 // import "./dependencies/SafeMath.sol";
 
 contract Verifier{
