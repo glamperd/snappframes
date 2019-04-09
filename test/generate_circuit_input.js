@@ -7,73 +7,69 @@ const merkle = require("./utils/MiMCMerkle.js");
 
 const NUM_LEAF = 8;
 
-function stringifyArray(array){
-    arrayString = []
-    for (i = 0; i < array.length; i++){
-        arrayString.push(array[i].toString())
-    } 
-    return arrayString
-}
-
-function stringifyAssetsArray(assetsArray){
-    assetsArrayString = []
-    for (i = 0; i < assetsArray.length; i++){
-        assetsArrayString.push(BigInt('0x'+assetsArray[i]).toString())
-    } 
-    return assetsArrayString
-}
-
-function stringifyMatrixElements(matrix){
-    matrixString = []
-    for (i = 0; i <  matrix.length; i++){
-        matrixString.push([matrix[i][0].toString(), matrix[i][1].toString()])
-    }
-    return matrixString
-}
-
 prvKeys = account.generatePrvKeys(NUM_LEAF);
 pubKeys = account.generatePubKeys(prvKeys);
+pathToSegment = [0, 0, 0];
 
 rawAssets = fs.readFileSync("../assets/hashes.json")
-assets = JSON.parse(rawAssets)
+// assets = JSON.parse(rawAssets)
+assets = [0,1,2,3,4,5,6,7]
 
-// initialise tree with one-to-one linear mapping of ownership (WLOG)
+// initialise tree with all assets owned by account[0]
 let leafHashArray = [];
 
 for (i = 0; i < NUM_LEAF; i++){
     leafHash = mimcjs.multiHash(
-        [pubKeys[i][0].toString(), pubKeys[i][1].toString(), BigInt('0x'+assets[i]).toString()]
+        [BigInt(pubKeys[0][0]).toString(), BigInt(pubKeys[0][1]).toString(), assets[i]]
     );
     leafHashArray.push(leafHash);    
 }
 
-console.log("oldLeafHash: ", leafHashArray[0])
+let [layer1, layer2, oldSegmentRoot] = merkle.rootFrom8LeafArray(leafHashArray);
+console.log('tree0', oldSegmentRoot)
 
-let [layer1, layer2, oldRoot] = merkle.rootFrom8LeafArray(leafHashArray);
-console.log("oldRoot: ", oldRoot)
-let merklePath = [leafHashArray[1], layer1[1], layer2[1]];
+var oldTree = new Array(4);
+oldTree[0] = oldSegmentRoot
+for (i = 1; i < 4; i++) {
+  oldTree[i] = mimcjs.multiHash([BigInt(oldTree[i-1]).toString(),pathToSegment[i-1].toString()]);
+}
+
+oldRoot = oldTree[3]
+
+console.log("old root: ", oldRoot)
 
 let indexFrom = 0;
 let indexTo = 7;
 
 //transfer index 0 from acct 0 to acct 1
 let msgHash = mimcjs.multiHash(
-    [oldRoot.toString(), indexFrom, indexTo]
+    [oldRoot.toString(), indexFrom.toString(), indexTo.toString()]
 )
 let signature = eddsa.signMiMC(prvKeys[0], msgHash)
 
 // update leafHashArray
- let newLeafHashArray = leafHashArray;
- let newLeafHash = mimcjs.multiHash(
-     [pubKeys[1][0].toString(), pubKeys[1][1].toString(), BigInt('0x'+assets[0]).toString()]
- );
-console.log("newLeafHash: ", newLeafHash)
+ let newLeafHashArray = [];
+ for (i = 0; i < NUM_LEAF; i++){
+    newLeafHash = mimcjs.multiHash(
+        [BigInt(pubKeys[1][0]).toString(), BigInt(pubKeys[1][1]).toString(), assets[i]]
+    );
+    newLeafHashArray.push(newLeafHash);    
+}
 
- newLeafHashArray[0] = newLeafHash;
+let [newLayer1, newLayer2, newSegmentRoot] = merkle.rootFrom8LeafArray(newLeafHashArray);
 
-let [newLayer1, newLayer2, newRoot] = merkle.rootFrom8LeafArray(newLeafHashArray);
+var newTree = new Array(4);
+newTree[0] = newSegmentRoot
+for (i = 1; i < 4; i++) {
+  newTree[i] = mimcjs.multiHash([BigInt(newTree[i-1]).toString(),pathToSegment[i-1].toString()]);
+}
+
+newRoot = newTree[3]
+
+console.log('tree0', newSegmentRoot)
 console.log("newRoot: ",newRoot)
 
+const pk = [pubKeys[0][0].toString(), pubKeys[0][1].toString()];
 
 const inputs = {
     fromPubKey_x: pubKeys[0][0].toString(),  
@@ -84,9 +80,9 @@ const inputs = {
     indexTo: indexTo,
     toPubKey_x: pubKeys[1][0].toString(),  
     toPubKey_y: pubKeys[1][1].toString(),   
-    segmentAssets: stringifyAssetsArray(assets),
-    segmentOwners: stringifyMatrixElements(pubKeys),
-    pathToSegment: stringifyArray(merklePath),
+    segmentAssets: assets,
+    segmentOwners: [pk,pk,pk,pk,pk,pk,pk,pk],
+    pathToSegment: pathToSegment,
     R8x: signature.R8[0].toString(),
     R8y: signature.R8[1].toString(),
     S: signature.S.toString()
@@ -98,4 +94,4 @@ JSON.stringify(inputs),
 "utf-8"
 );
 
-
+  
