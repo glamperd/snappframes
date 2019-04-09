@@ -14,9 +14,9 @@ template Main() {
     signal input newRootHash;
     signal input indexFrom; // Start frame with tree segment 0-7
     signal input indexTo; // Transfer up to this frame number 0-7
-    signal input toPubKey_x;
+    signal input toPubKey_x; // Public key parts for the transferee
     signal input toPubKey_y;
-    signal input segmentAssets[8];
+    signal input segmentAssets[8]; // Hashes of the frame data for each leaf in the segment
     signal input segmentOwners[8,2]; // Owner pub key x, y
     signal input pathToSegment[3]; // Sibling hashes along the path
     // EdDSA verifier params
