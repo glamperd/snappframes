@@ -63,13 +63,15 @@ contract Snappframes is ERC721Full, Verifier, MiMC {
 
     uint256 public depositQueueLength = 0;
     address[4] depositQueueAddresses;
-    mapping(address => uint) depositQueue;
+    mapping(address => uint[2]) depositQueue;
     mapping(address => uint256[2]) public ecdsaToEddsa;
 
 
     event InitialRoot(uint256 _initialRoot);
     event Deposit(address _depositor, uint _segmentIdx, uint _leafIdx);
     event DepositsProcessed(address _firstDepositor, address _lastDepositor);
+
+    event Leaf(uint256 _leaf);
 
     modifier depositQueueNotFull(){
         require(depositQueueLength <= DEPOSIT_QUEUE_MAX);
@@ -127,16 +129,22 @@ contract Snappframes is ERC721Full, Verifier, MiMC {
 
         depositQueueLength++;
         depositQueueAddresses[depositQueueLength - 1] = msg.sender;
-        depositQueue[msg.sender] = _index;
 
+        // convert idx into segmentIdx, leaf idx (on segment)
+        (uint segmentIdx, uint leafIdx) = getDivided(_index, NUM_LEAVES_PER_SEGMENT);
+        
+        depositQueue[msg.sender] = [segmentIdx, leafIdx];
+
+        // assign msg.sender to declared eddsa address
         ecdsaToEddsa[msg.sender] = _eddsaPubKey;
 
-        emit Deposit(msg.sender, _index);
+        emit Deposit(msg.sender, segmentIdx, leafIdx);
 
     }
 
     // operator updates merkle tree with deposits
     function processDepositQueue() public operatorOnly{
+
         emit DepositsProcessed(
             depositQueueAddresses[0], 
             depositQueueAddresses[depositQueueAddresses.length - 1]);
@@ -156,22 +164,32 @@ contract Snappframes is ERC721Full, Verifier, MiMC {
         // uint256 s //EdDSA signature field
     ) public {
         uint256[2] memory eddsaPubKey = ecdsaToEddsa[msg.sender];
-        require(eddsaPubKey[0] == pubkey[0] && eddsaPubKey[1] == pubkey[1]);
 
         // // verify EdDSA signature
         // require(EdDSA.Verify(pubkey, hashed_msg, R, s));  
 
+        require(eddsaPubKey[0] == pubkey[0] && eddsaPubKey[1] == pubkey[1]);
+
         // verify hashed msg sends leaf to msg.sender
         uint256 leaf = mimcHash(mimcHash(pubkey[0], pubkey[1]), asset);
-        require(verifyMerkleProof(leaf, proof, root));
-        // require(mimc.MiMCpe7(msg.sender, leaf) == hashed_msg);
+        emit Leaf(leaf);
+        
+        // require(verifyMerkleProof(leaf, proof, root));
+        // // require(mimc.MiMCpe7(msg.sender, leaf) == hashed_msg);
 
-        // generate ERC721 token
-        bytes32 tokenId = keccak256(abi.encodePacked(pubkey[0],pubkey[1]));
-        _mint(msg.sender, bytes32ToUint256(tokenId));
+        // // generate ERC721 token
+        // bytes32 tokenId = keccak256(abi.encodePacked(pubkey[0],pubkey[1]));
+        // _mint(msg.sender, bytes32ToUint256(tokenId));
 
         // send token to depositor on Ethereum
     }
+    
+    // getters
+    function getEddsaAddr(address _ethAddress) public view returns(uint256[2] memory){
+        // uint256[2] memory eddsaAddr = ecdsaToEddsa[_ethAddress];
+        return ecdsaToEddsa[_ethAddress];
+    }
+
 
     // helpers
 
@@ -198,5 +216,10 @@ contract Snappframes is ERC721Full, Verifier, MiMC {
         return uint256(n);
     }
 
-
+    function getDivided(uint numerator, uint denominator) public 
+    returns(uint quotient, uint remainder) {
+        quotient  = numerator / denominator;
+        remainder = numerator - denominator * quotient;
+    }
 }
+
