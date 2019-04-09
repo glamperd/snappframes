@@ -31,8 +31,9 @@ console.log("Old Root")
 console.log(oldRoot);
 
 const msgHash = mimcjs.multiHash([oldRoot.toString(), indexFrom.toString(), indexTo.toString()]);
+console.log('msgHash', msgHash);
 const signature = eddsa.signMiMC(prvKeyFrom, msgHash);
-console.log('signature', signature)
+//console.log('signature', signature)
 
 const pubKeyTo = eddsa.prv2pub(prvKeyTo);
 const newRoot = merkle(assetHashes, pubKeyTo, pathToSegment);
@@ -79,7 +80,7 @@ function merkle(assetHashes, pubKey, pathToSegment) {
   const hashes = assetHashes.map((item, key) => {
     return mimcjs.multiHash([pubKey[0].toString(),pubKey[1].toString(),item.toString()]);
   });
-  //console.log(hashes);
+  console.log(hashes);
 
   var i;
   var l3Hashes = new Array(4);

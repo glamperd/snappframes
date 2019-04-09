@@ -26,7 +26,6 @@ template Main() {
 
     signal output out;
 
-    signal authOk[8];
 
     // Assemble leaves for the segment.
     var i;
@@ -55,43 +54,52 @@ template Main() {
     oldRootHash = old_tree.rootHash;
 
     // Confirm signatures
-    //component verifier = EdDSAMiMCVerifier();
-    //verifier.enabled <== 1;
-    //verifier.Ax <== fromPubKey_x;
-    //verifier.Ay <== fromPubKey_y;
-    //verifier.R8x <== R8x
-    //verifier.R8y <== R8y
-    //verifier.S <== S;
+    component verifier = EdDSAMiMCVerifier();
+    verifier.enabled <== 0;
+    verifier.Ax <== fromPubKey_x;
+    verifier.Ay <== fromPubKey_y;
+    verifier.R8x <== R8x
+    verifier.R8y <== R8y
+    verifier.S <== S;
 
-    //component msgHash = MultiMiMC7(3,91);
-    //msgHash.in[0] <== oldRootHash;
-    //msgHash.in[1] <== indexFrom;
-    ///msgHash.in[2] <== indexTo;
-    //verifier.M <== msgHash.out;
+    component msgHash = MultiMiMC7(3,91);
+    msgHash.in[0] <== oldRootHash;
+    msgHash.in[1] <== indexFrom;
+    msgHash.in[2] <== indexTo;
+    verifier.M <== msgHash.out;
 
     // Confirm ownership & Replace owner
-    component compareAcc[8];
+    //component compareAcc[8];
+
+    for (i=0; i<8; i++) {
+        //compareAcc[i] = IsEqual();
+        if (i>=indexFrom && i<=indexTo) {
+            fromPubKey_x === segmentOwners[i,0];
+            fromPubKey_y === segmentOwners[i,1];
+            //compareAcc[i].in[0] <== segmentOwners[i,0];
+            //compareAcc[i].in[1] <== segmentOwners[i,1];
+        }
+        //else {
+            // Redundant, but an assignment must be made once declared
+            //compareAcc[i].in[0] <== 1;
+            //compareAcc[i].in[1] <== 1;
+        //}
+        //authOk[i] <== compareAcc[i].out;
+    }
+
+
     component newLeaves[8];
 
     for (i=0; i<8; i++) {
-        compareAcc[i] = IsEqual();
         newLeaves[i] = Leaf();
         if (i>=indexFrom && i<=indexTo) {
-            compareAcc[i].in[0] <== segmentOwners[i,0];
-            compareAcc[i].in[1] <== segmentOwners[i,1];
-            newLeaves[i].pubkey_x <== toPubKey_x;
-            newLeaves[i].pubkey_y <== toPubKey_y;
-            newLeaves[i].asset <== segmentAssets[i];
-
+            newLeaves[i].pubkey_x <-- toPubKey_x;
+            newLeaves[i].pubkey_y <-- toPubKey_y;
         } else {
-            // Redundant, but an assignment must be made once declared
-            compareAcc[i].in[0] <== 1;
-            compareAcc[i].in[1] <== 1;
-            newLeaves[i].pubkey_x <== segmentOwners[i,0];
-            newLeaves[i].pubkey_y <== segmentOwners[i,1];
+            newLeaves[i].pubkey_x <-- segmentOwners[i,0];
+            newLeaves[i].pubkey_y <-- segmentOwners[i,1];
         }
-        authOk[i] <== compareAcc[i].out;
-        newLeaves[i].asset <== segmentAssets[i];
+        newLeaves[i].asset <-- segmentAssets[i];
     }
 
     // Calculate new segment
@@ -100,19 +108,15 @@ template Main() {
         newSegment.leafHashes[i] <== newLeaves[i].hash;
     }
 
-    // Recalculate hashes up to the root.
-    component hash3[3];
-    hash3[0] = Hash2();
-    hash3[0].a <== newSegment.rootHash;
-    hash3[0].b <== pathToSegment[0];
-    for (i=1; i<3; i++) {
-        hash3[i] = Hash2();
-        hash3[i].a <== hash3[i-1].out;
-        hash3[i].b <== pathToSegment[i];
+    component new_tree = TreeWithSegment6();
+    for (i=0; i<3; i++) {
+      new_tree.pathToSegment[i] <== pathToSegment[i];
     }
-    out <== hash3[2].out;
+    new_tree.segmentRootHash <== newSegment.rootHash;
 
-    //out <== newRootHash;
+    newRootHash === new_tree.rootHash;
+
+    new_tree.rootHash --> out;
 }
 
 component main = Main();
