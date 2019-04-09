@@ -5,7 +5,7 @@ pragma solidity >=0.5.0;
 // Owned contract, with token recovery
 // ----------------------------------------------------------------------------
 contract Owned {
-    address public owner;
+    address payable public owner;
     address public newOwner;
 
     event OwnershipTransferred(address indexed _from, address indexed _to);

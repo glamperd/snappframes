@@ -1,4 +1,4 @@
-pragma solidity ^0.5.4;
+pragma solidity >=0.5.2;
 
 // ----------------------------------------------------------------------------
 // Borrowed from BokkyPooBah's Fixed Supply Token 👊 + Factory v1.10
@@ -12,8 +12,8 @@ pragma solidity ^0.5.4;
 // ----------------------------------------------------------------------------
 
 
-import "./dependancies/SafeMath.sol";
-import "./dependancies/Owned.sol";
+import "./dependencies/SafeMath.sol";
+import "./dependencies/Owned.sol";
 
 // import "./Snappframes.sol";
 // import "../circuits/verifier.sol";

@@ -30,7 +30,7 @@ library MiMC
     * Recommended at least 46 rounds, for a polynomial degree of 2^126
     */
     function MiMCpe7( uint256 in_x, uint256 in_k, uint256 in_seed, uint256 round_count )
-        internal pure returns(uint256 out_x)
+        public pure returns(uint256 out_x)
     {
         assembly {
             if lt(round_count, 1) { revert(0, 0) }
