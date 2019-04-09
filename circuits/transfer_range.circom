@@ -51,7 +51,7 @@ template Main() {
     }
     old_tree.segmentRootHash <== oldSegment.rootHash;
 
-    oldRootHash = old_tree.rootHash;
+    oldRootHash === old_tree.rootHash;
 
     // Confirm signatures
     component verifier = EdDSAMiMCVerifier();
@@ -114,9 +114,9 @@ template Main() {
     }
     new_tree.segmentRootHash <== newSegment.rootHash;
 
+    new_tree.rootHash --> out;
     newRootHash === new_tree.rootHash;
 
-    new_tree.rootHash --> out;
 }
 
 component main = Main();
