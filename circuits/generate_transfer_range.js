@@ -14,6 +14,7 @@ const prvKeyTo = Buffer.from("00000000000000000000000000000000000000000000000000
 
 const pubKeyFrom = eddsa.prv2pub(prvKeyFrom);
 const assetHashes = [0,1,2,3,4,5,6,7];
+const pathToSegment = [0,0,0];
 
 const oldRoot = merkle(assetHashes, pubKeyFrom, pathToSegment);
 console.log("Old Root")
@@ -22,7 +23,7 @@ console.log(oldRoot);
 const msgHash = mimcjs.MultiHash(oldRoot, indexFrom, indexTo);
 const signature = eddsa.signMiMC(prvKey, msgHash);
 
-const newRoot = merkle(assetHashes, pubKeyTo);
+const newRoot = merkle(assetHashes, pubKeyTo, pathToSegment);
 
 const inputs = {
       fromPubKey_x: pubKeyFrom[0].toString(),
@@ -52,9 +53,11 @@ console.log("New Root")
 console.log(newRoot);
 
 function merkle(assetHashes, pubKey, pathToSegment) {
-  const hashes = assetHashes.map((item) => {
-    mimcjs.multiHash([pubKey[0],pubKey[1],item]);
+  console.log(assetHashes)
+  const hashes = assetHashes.map((item, key) => {
+    return mimcjs.multiHash([pubKey[0],pubKey[1],item]);
   });
+  console.log(hashes);
 
   var i;
   var l3Hashes;
