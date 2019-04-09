@@ -79,6 +79,10 @@ To transfer ownership, together with ability to produce the two types of proofs,
 
 We provide segmented SNARK proofs so that users have the option of just updating their segment without affecting or needing to know the state of other segments. 
 
+### Data availability 
+We're excited about the "Computational Layer 2" paradigm (https://docs.google.com/presentation/d/1EVjrZhoxw-ikzelFGGv7czxuJsIIWfl5I-CPIlnjsME/), where Layer 1 can be used as cheap data blobs. Thus we've kept most of our circuit inputs public, to make use of on-chain data availability. 
+
+It would be trivial to change our public inputs to private, resulting in gas savings; however, this would also require a fraud proof and Plasma-like challenge mechanism. 
 
 ## Demo
 
