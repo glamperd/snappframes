@@ -61,7 +61,8 @@ const inputs = {
 fs.writeFileSync('./input.json', JSON.stringify(inputs) , 'utf-8');
 
 const contractInputs = {
-      EDDSA_0: ['0x'+pubKeyFrom[0].toString(16), '0x'+pubKeyFrom[1].toString(16)],
+      EDDSA_0_DEC: [pubKeyFrom[0].toString(), pubKeyFrom[1].toString()],
+      EDDSA_0_HEX: ['0x'+pubKeyFrom[0].toString(16), '0x'+pubKeyFrom[1].toString(16)],
       ASSET_0: assetHashes[0].toString(),
       OLD_LEAF_HASH: mimcjs.multiHash([pubKeyFrom[0].toString(),pubKeyFrom[1].toString(),assetHashes[0].toString()]).toString(),
       MERKLE_PROOF: [0,0,0],
