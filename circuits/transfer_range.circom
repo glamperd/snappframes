@@ -55,19 +55,19 @@ template Main() {
     oldRootHash = old_tree.rootHash;
 
     // Confirm signatures
-    //component verifier = EdDSAMiMCVerifier();
-    //verifier.enabled <== 1;
-    //verifier.Ax <== fromPubKey_x;
-    //verifier.Ay <== fromPubKey_y;
-    //verifier.R8x <== R8x
-    //verifier.R8y <== R8y
-    //verifier.S <== S;
+    component verifier = EdDSAMiMCVerifier();
+    verifier.enabled <== 1;
+    verifier.Ax <== fromPubKey_x;
+    verifier.Ay <== fromPubKey_y;
+    verifier.R8x <== R8x
+    verifier.R8y <== R8y
+    verifier.S <== S;
 
-    //component msgHash = MultiMiMC7(3,91);
-    //msgHash.in[0] <== oldRootHash;
-    //msgHash.in[1] <== indexFrom;
-    ///msgHash.in[2] <== indexTo;
-    //verifier.M <== msgHash.out;
+    component msgHash = MultiMiMC7(3,91);
+    msgHash.in[0] <== oldRootHash;
+    msgHash.in[1] <== indexFrom;
+    msgHash.in[2] <== indexTo;
+    verifier.M <== msgHash.out;
 
     // Confirm ownership & Replace owner
     component compareAcc[8];
