@@ -55,9 +55,18 @@ const inputs = {
       segmentOwners: [pk,pk,pk,pk,pk,pk,pk,pk]
     }
 
-console.log(inputs)
+// console.log(inputs)
 
 fs.writeFileSync('./input.json', JSON.stringify(inputs) , 'utf-8');
+
+const contractInputs = {
+      EDDSA_0: [pubKeyFrom[0].toString(), pubKeyFrom[1].toString(),
+      ASSET_0: assetHashes[0].toString(),
+      OLD_LEAF_HASH: oldRoot.toString(),
+      MERKLE_PROOF: 
+}
+
+fs.writeFileSync('../contracts/contractInput.json'),JSON.stringify(contractInputs, null, 4, 'utf-8'); 
 
 //const new_hash = mimcjs.multiHash([pubKey[0],pubKey[1],nonce+1]);
 

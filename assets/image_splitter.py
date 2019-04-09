@@ -27,7 +27,7 @@ for r in range(0,img.shape[0],length):
         #split image into chunks
         img_filename = f"img{r}_{c}.png"
         img_chunk = img[r:r+length, c:c+width,:]
-        # cv2.imwrite(img_filename, img_chunk)
+        cv2.imwrite(img_filename, img_chunk)
 
         #encode image chunk into base64
         encoded_filename = f"img{r}_{c}.json"
@@ -43,11 +43,11 @@ for r in range(0,img.shape[0],length):
                 'encoded_hash': str(encoded_hash)}
 
         # Write JSON file
-        # with io.open(encoded_filename, 'w', encoding='utf8') as outfile:
-        #         str_ = json.dumps(data,
-        #                         indent=4, sort_keys=True,
-        #                         separators=(',', ': '), ensure_ascii=False)
-        #         outfile.write(to_unicode(str_))
+        with io.open(encoded_filename, 'w', encoding='utf8') as outfile:
+                str_ = json.dumps(data,
+                                indent=4, sort_keys=True,
+                                separators=(',', ': '), ensure_ascii=False)
+                outfile.write(to_unicode(str_))
 
 with io.open('hashes.json', 'w', encoding='utf8') as outfile:
         str_ = json.dumps(hashes,
