@@ -8,7 +8,7 @@ PoC use case: crowdfunding an indie movie by selling unique movie frames.
 
 NFTs are an elegant solution for ensuring scarcity of unique digital artwork. However, as the CryptoKitties craze has shown, a really successful token can place significant computational burden on the chain. `snappframes` takes costly token transactions off-chain, thus saving on gas costs while still providing a guarantee of valid state transitions.
 
-roll_up (github.com/barryWhiteHat/roll_up) has been mostly used for ERC20 tokens, where each leaf in the Merkle tree represents an account with a balance. **`snappframes` is a 'twist' on roll_up** which instead uses each leaf to represent a unique token; accounts move from leaf to leaf to represent token transfers.
+roll_up (github.com/barryWhiteHat/roll_up) has been mostly used for ERC20 tokens, where each leaf in the Merkle tree represents an account with a balance. **`snappframes` is a 'twist' on roll_up: instead of representing each account as a leaf, we represent each unique token as a leaf; accounts are the ones which move from leaf to leaf.**
 
 ## Overview
 
@@ -104,6 +104,6 @@ Through a series of steps (see https://iden3.io/blog/circom-and-snarkjs-tutorial
 ![](https://i.imgur.com/IvTnpBb.png)
 
 ### Smart contracts
-To deploy `circuits/verifier.sol`, follow the instructions at https://github.com/therealyingtong/deploySnappframeVerifier. We've already deployed one at https://rinkeby.etherscan.io/address/0xDcDCDd25f10ad1A26090010a89994Eb644f88427#code.
+To deploy `circuits/verifier.sol`, follow the instructions at https://github.com/therealyingtong/deploySnappframeVerifier. We've already deployed one at https://rinkeby.etherscan.io/address/0xDcDCDd25f10ad1A26090010a89994Eb644f88427#code. And https://ropsten.etherscan.io/address/0xEd3564b7377b90fad536e428e54d856E6928b4dA#code.
 
 To generate the inputs to `verifyProof`, use `snarkjs generatecall`. We've saved the inputs in `test/verifyProof.js`. In fact, if you run that file you'll be able to directly interact with the `Verifier.sol` contract on Rinkeby.
