@@ -100,3 +100,6 @@ Through a series of steps (see https://iden3.io/blog/circom-and-snarkjs-tutorial
 ![](https://i.imgur.com/IvTnpBb.png)
 
 ### Smart contracts
+To deploy `circuits/verifier.sol`, follow the instructions at https://github.com/therealyingtong/deploySnappframeVerifier. We've already deployed one at https://rinkeby.etherscan.io/address/0xDcDCDd25f10ad1A26090010a89994Eb644f88427#code.
+
+To generate the inputs to `verifyProof`, use `snarkjs generatecall`. We've saved the inputs in `test/verifyProof.js`. In fact, if you run that file you'll be able to directly interact with the `Verifier.sol` contract on Rinkeby.
