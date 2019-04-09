@@ -1,6 +1,6 @@
 # snappframes
 
-roll_up for ERC721 tokens. 
+roll_up for non-fungible tokens. 
 
 PoC use case: crowdfunding an indie movie by selling unique movie frames.
 
