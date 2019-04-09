@@ -17,12 +17,14 @@ template Main() {
     signal input toPubKey_x;
     signal input toPubKey_y;
     signal input segmentAssets[8];
-    signal input segmentOwners[8,2];
+    signal input segmentOwners[8,2]; // Owner pub key x, y
     signal input pathToSegment[3]; // Sibling hashes along the path
     // EdDSA verifier params
     signal input R8x;
     signal input R8y;
     signal input S;
+
+    signal input segRoot;
 
     signal output out;
 
@@ -40,7 +42,7 @@ template Main() {
     // Build segment
     component oldSegment = TreeSegment8();
     for (i=0; i<8; i++) {
-      oldSegment.leafHashes[i] <== leaves[i].hash;
+      oldSegment.leafHashes[i] <-- leaves[i].hash;
     }
 
     // Assemble full tree (path + segment)
@@ -49,44 +51,33 @@ template Main() {
     for (i=0; i<3; i++) {
       old_tree.pathToSegment[i] <== pathToSegment[i];
     }
-    old_tree.segmentRootHash <== oldSegment.rootHash;
-
+    old_tree.segmentRootHash <-- oldSegment.rootHash;
+    //segRoot === oldSegment.rootHash;
     oldRootHash === old_tree.rootHash;
 
     // Confirm signatures
-    component verifier = EdDSAMiMCVerifier();
-    verifier.enabled <== 0;
-    verifier.Ax <== fromPubKey_x;
-    verifier.Ay <== fromPubKey_y;
-    verifier.R8x <== R8x
-    verifier.R8y <== R8y
-    verifier.S <== S;
+    //component verifier = EdDSAMiMCVerifier();
+    ///verifier.enabled <-- 0;
+    //verifier.Ax <-- fromPubKey_x;
+    //verifier.Ay <-- fromPubKey_y;
+    //verifier.R8x <-- R8x
+    //verifier.R8y <-- R8y
+    //verifier.S <-- S;
 
-    component msgHash = MultiMiMC7(3,91);
-    msgHash.in[0] <== oldRootHash;
-    msgHash.in[1] <== indexFrom;
-    msgHash.in[2] <== indexTo;
-    verifier.M <== msgHash.out;
+    //component msgHash = MultiMiMC7(3,91);
+    //msgHash.in[0] <-- oldRootHash;
+    //msgHash.in[1] <-- indexFrom;
+    //msgHash.in[2] <-- indexTo;
+    //verifier.M <-- msgHash.out;
 
     // Confirm ownership & Replace owner
-    //component compareAcc[8];
 
     for (i=0; i<8; i++) {
-        //compareAcc[i] = IsEqual();
         if (i>=indexFrom && i<=indexTo) {
             fromPubKey_x === segmentOwners[i,0];
             fromPubKey_y === segmentOwners[i,1];
-            //compareAcc[i].in[0] <== segmentOwners[i,0];
-            //compareAcc[i].in[1] <== segmentOwners[i,1];
         }
-        //else {
-            // Redundant, but an assignment must be made once declared
-            //compareAcc[i].in[0] <== 1;
-            //compareAcc[i].in[1] <== 1;
-        //}
-        //authOk[i] <== compareAcc[i].out;
     }
-
 
     component newLeaves[8];
 
@@ -116,7 +107,6 @@ template Main() {
 
     new_tree.rootHash --> out;
     newRootHash === new_tree.rootHash;
-
 }
 
 component main = Main();

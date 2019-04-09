@@ -6,7 +6,9 @@ const mimcjs = require("../circomlib/src/mimc7.js");
 
 const bigInt = snarkjs.bigInt;
 
-const DEPTH = 6;
+const DEPTH = 7;
+const SEGMENT_HEIGHT = 4;
+const PATH_LENGTH = DEPTH - SEGMENT_HEIGHT;
 const msg = bigInt(9999);
 
 /*
@@ -69,7 +71,7 @@ const contractInputs = {
       INITIAL_ROOT: oldRoot.toString()
 }
 
-fs.writeFileSync('../contracts/contractInput.json',JSON.stringify(contractInputs), null, " "); 
+fs.writeFileSync('../contracts/contractInput.json',JSON.stringify(contractInputs), null, " ");
 
 //const new_hash = mimcjs.multiHash([pubKey[0],pubKey[1],nonce+1]);
 
@@ -81,7 +83,7 @@ function merkle(assetHashes, pubKey, pathToSegment) {
   const hashes = assetHashes.map((item, key) => {
     return mimcjs.multiHash([pubKey[0].toString(),pubKey[1].toString(),item.toString()]);
   });
-  console.log(hashes);
+  console.log('leaf hash 0', hashes[0].toString());
 
   var i;
   var l3Hashes = new Array(4);
@@ -98,10 +100,11 @@ function merkle(assetHashes, pubKey, pathToSegment) {
 
   var tree = new Array(DEPTH-1);
   tree[0] = mimcjs.multiHash([l2Hashes[0].toString(),l2Hashes[1].toString()]);
-  //console.log('tree0', tree[0]);
+  console.log('tree0', tree[0]);
 
   for (i = 1; i < DEPTH-3; i++) {
     tree[i] = mimcjs.multiHash([tree[i-1].toString(),pathToSegment[i].toString()]);
+    console.log('pathHash',i, tree[i])
   }
 
   //console.log('tree', tree)
