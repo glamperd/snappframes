@@ -8,7 +8,7 @@ PoC use case: crowdfunding an indie movie by selling unique movie frames.
 
 NFTs are an elegant solution for ensuring scarcity of unique digital artwork. However, as the CryptoKitties craze has shown, a really successful token can place significant computational burden on the chain. `snappframes` takes costly token transactions off-chain, thus saving on gas costs while still providing a guarantee of valid state transitions.
 
-roll_up (github.com/barryWhiteHat/roll_up) has been mostly used for ERC20 tokens, where each leaf in the Merkle tree represents an account with a balance. `snappframes` is a 'twist' on this which instead uses each leaf to represent a unique token; accounts move from leaf to leaf to represent token transfers.
+roll_up (github.com/barryWhiteHat/roll_up) has been mostly used for ERC20 tokens, where each leaf in the Merkle tree represents an account with a balance. **`snappframes` is a 'twist' on roll_up** which instead uses each leaf to represent a unique token; accounts move from leaf to leaf to represent token transfers.
 
 ## Overview
 
