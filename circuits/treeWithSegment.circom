@@ -5,7 +5,7 @@ include "./hash2.circom";
 template TreeWithSegment6() {
     signal input pathToSegment[3];
     signal input segmentRootHash;
-    signal input hashes[3];
+    //signal hashes[3];
 
     signal output rootHash;
 
@@ -14,7 +14,7 @@ template TreeWithSegment6() {
     levelHash[0] = Hash2();
     levelHash[0].a <-- segmentRootHash;
     levelHash[0].b <-- pathToSegment[2];
-    levelHash[0].out === hashes[0];
+    //levelHash[0].out === hashes[0];
 
     var i;
     for (i=1; i<3; i++) {

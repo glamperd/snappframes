@@ -56,8 +56,7 @@ template Main() {
 
     // Confirm signatures
     component verifier = EdDSAMiMCVerifier();
-    // TODO - Set this to 1 when it's working
-    verifier.enabled <-- 0;
+    verifier.enabled <-- 1;
     verifier.Ax <-- fromPubKey_x;
     verifier.Ay <-- fromPubKey_y;
     verifier.R8x <-- R8x
@@ -68,7 +67,7 @@ template Main() {
     msgHash.in[0] <-- oldRootHash;
     msgHash.in[1] <-- indexFrom;
     msgHash.in[2] <-- indexTo;
-    verifier.M <-- msgHash.out;
+    verifier.M <== msgHash.out;
 
     // Confirm ownership & Replace owner
 
